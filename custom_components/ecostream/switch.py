@@ -13,7 +13,6 @@ from typing import Any
 from .const import (
     CONF_PRESET_OVERRIDE_MINUTES,
     CONF_SUMMER_COMFORT_TEMP,
-    DEFAULT_BOOST_DURATION_MINUTES,
     DEFAULT_BYPASS_DURATION_MINUTES,
     DEFAULT_PRESET_OVERRIDE_MINUTES,
     DEFAULT_SUMMER_COMFORT_TEMP,
@@ -40,14 +39,13 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Register EcoStream switches and boost controls."""
+    """Register EcoStream switches."""
     coordinator: EcostreamDataUpdateCoordinator = entry.runtime_data
 
     entities: list[Any] = [
         EcostreamScheduleSwitch(coordinator, entry),
         EcostreamSummerComfortSwitch(coordinator, entry),
         EcostreamBypassSwitch(coordinator, entry),
-        EcostreamBoostSwitch(coordinator, entry),
         EcostreamPresetSwitch(coordinator, entry, PRESET_LOW),
         EcostreamPresetSwitch(coordinator, entry, PRESET_MID),
         EcostreamPresetSwitch(coordinator, entry, PRESET_HIGH),
@@ -213,141 +211,6 @@ class EcostreamSummerComfortSwitch(EcostreamConfigSwitch):
             self._log_action,
         )
 
-
-# ============================================================================
-# Boost switch
-# ============================================================================
-
-
-class EcostreamBoostSwitch(EcostreamBaseEntity):
-    """Boost: tijdelijk hoge Qset met timer (default: 15 minuten)."""
-
-    _attr_name = "Boost"
-    _attr_icon = "mdi:weather-windy"
-
-    def __init__(
-        self,
-        coordinator: EcostreamDataUpdateCoordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        super().__init__(coordinator, entry)
-        self._attr_unique_id = f"{self._entry.entry_id}_boost"
-        status = self._get_status()
-        val = status.get("override_set_time_left")
-        try:
-            self._attr_is_on = val is not None and int(float(val)) > 0
-        except (TypeError, ValueError):
-            self._attr_is_on = False
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Update UI wanneer nieuwe EcoStream data binnenkomt."""
-        status = self._get_status()
-        val = status.get("override_set_time_left")
-        try:
-            self._attr_is_on = val is not None and int(float(val)) > 0
-        except (TypeError, ValueError):
-            self._attr_is_on = False
-        self.async_write_ha_state()
-
-    # ------------------------------
-    # Boost AAN
-    # ------------------------------
-
-    async def async_turn_on(self, **kwargs: Any) -> None:
-        """Start (of reset) Boost: hoge Qset gedurende X minuten."""
-
-        if not self.coordinator.ws:
-            _LOGGER.error(
-                "EcoStream WebSocket not connected, cannot start boost"
-            )
-            return
-
-        config = self._get_config()
-
-        qset_raw = config.get("setpoint_high")
-
-        if qset_raw is None:
-            _LOGGER.error(
-                "Cannot start boost: config.setpoint_high is unavailable"
-            )
-            return
-
-        try:
-            qset = float(qset_raw)
-        except (TypeError, ValueError):
-            _LOGGER.error(
-                "Cannot start boost: invalid config.setpoint_high value %r",
-                qset_raw,
-            )
-            return
-
-        # ----------------------------
-        # DUUR: altijd minstens 1 min
-        # ----------------------------
-        minutes = getattr(
-            self.coordinator,
-            "boost_duration_minutes",
-            DEFAULT_BOOST_DURATION_MINUTES,
-        )
-        try:
-            minutes = int(minutes)
-        except (TypeError, ValueError):
-            minutes = DEFAULT_BOOST_DURATION_MINUTES
-
-        if minutes < 1:
-            _LOGGER.debug(
-                "Boost duration %s is < 1 minute → using default %s",
-                minutes,
-                DEFAULT_BOOST_DURATION_MINUTES,
-            )
-            minutes = DEFAULT_BOOST_DURATION_MINUTES
-
-        duration = minutes * 60  # seconden
-
-        payload = {
-            "config": {
-                "man_override_set": qset,
-                "man_override_set_time": duration,
-            }
-        }
-
-        _LOGGER.debug(
-            "Boost → ON (qset=%.1f, duration=%ss)",
-            qset,
-            duration,
-        )
-
-        await self._apply_config(payload["config"], "boost")
-
-    # ------------------------------
-    # Boost UIT (handmatig)
-    # ------------------------------
-
-    async def async_turn_off(self, **kwargs: Any) -> None:
-        """Handmatig Boost stoppen vóór het einde van de timer.
-
-        We resetten alleen de override-timer op de unit:
-        - man_override_set_time = 0
-
-        De EcoStream valt dan terug op de normale regeling
-        (setpoints / schema). Dat gedraagt zich zoals de officiële app.
-        """
-        if not self.coordinator.ws:
-            _LOGGER.error(
-                "EcoStream WebSocket not connected, cannot stop boost"
-            )
-            return
-
-        payload = {
-            "config": {
-                "man_override_set_time": 0,
-            }
-        }
-
-        _LOGGER.debug("Boost → OFF (clear man_override_set_time)")
-
-        await self._apply_config(payload["config"], "boost")
 
 
 # ============================================================================

@@ -122,32 +122,6 @@ views:
                   name:
                     - font-weight: 100
               - type: custom:button-card
-                entity: switch.ecostream_boost
-                name: Boost
-                icon: mdi:rocket-launch
-                show_state: true
-                show_label: true
-                tap_action:
-                  action: toggle
-                state:
-                  - value: 'on'
-                    styles:
-                      card:
-                        - box-shadow: 0 8px 20px rgba(0,122,255,0.35)
-                      icon:
-                        - color: '#007aff'
-                styles:
-                  card:
-                    - border-radius: 22px
-                    - padding: 18px
-                    - box-shadow: 0 4px 12px rgba(0,0,0,0.08)
-                  icon:
-                    - width: 40px
-                    - height: 30px
-                    - color: '#007aff'
-                  name:
-                    - font-weight: 100
-              - type: custom:button-card
                 entity: switch.ecostream_bypass_valve
                 name: Bypass
                 icon: mdi:valve

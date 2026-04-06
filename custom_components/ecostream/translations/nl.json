@@ -43,7 +43,6 @@
         "data": {
           "filter_replacement_days": "Filtervervanging interval (dagen)",
           "preset_override_minutes": "Preset overschrijving duur (minuten)",
-          "boost_duration": "Boost duur (minuten)",
           "bypass_duration": "Bypass overschrijving duur (minuten)",
           "allow_override_filter_date": "Sta wijzigen filterdatum toe",
           "summer_comfort_temp": "Zomercomfort doeltemperatuur (C)"
@@ -174,21 +173,6 @@
       },
       "summer_comfort": {
         "name": "Zomercomfort"
-      },
-      "boost": {
-        "name": "Boost"
-      }
-    },
-    "select": {
-      "boost_duration": {
-        "name": "Boostduur",
-        "state": {
-          "5": "5 minuten",
-          "10": "10 minuten",
-          "15": "15 minuten",
-          "30": "30 minuten",
-          "60": "60 minuten"
-        }
       }
     },
     "number": {
