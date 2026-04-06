@@ -19,7 +19,6 @@ from custom_components.ecostream.sensor import (
     EcostreamSensorDescription,
     _calc_efficiency,  # pyright: ignore[reportPrivateUsage]
     _deep_get,  # pyright: ignore[reportPrivateUsage]
-    _format_uptime,  # pyright: ignore[reportPrivateUsage]
     _int_value,  # pyright: ignore[reportPrivateUsage]
     _number_value,  # pyright: ignore[reportPrivateUsage]
     async_setup_entry,
@@ -76,34 +75,6 @@ def test_deep_get_empty_path_returns_data():
     data = {"key": "val"}
     assert _deep_get(data, []) == data
 
-
-# ---------------------------------------------------------------------------
-# _format_uptime
-# ---------------------------------------------------------------------------
-
-
-def test_format_uptime_negative():
-    assert _format_uptime(-1) == "0m"
-
-
-def test_format_uptime_minutes_only():
-    assert _format_uptime(300) == "5m"
-
-
-def test_format_uptime_hours_and_minutes():
-    assert _format_uptime(3661) == "1h 1m"
-
-
-def test_format_uptime_days_hours_minutes():
-    assert _format_uptime(86400 + 3600 + 60) == "1d 1h 1m"
-
-
-def test_format_uptime_zero():
-    assert _format_uptime(0) == "0m"
-
-
-def test_format_uptime_exact_day():
-    assert _format_uptime(86400) == "1d 0h 0m"
 
 
 def test_number_value_none_returns_none():
@@ -270,17 +241,17 @@ def test_sensor_native_value_date_non_datetime_passthrough():
     assert _make_sensor(desc).native_value == raw
 
 
-def test_sensor_native_value_uptime_formatted():
+def test_sensor_native_value_uptime_returns_seconds():
     desc = EcostreamSensorDescription(
         key="uptime", value_fn=lambda d: d.get("uptime")
     )
     sensor = _make_sensor(desc, {"uptime": 3661})
-    assert sensor.native_value == "1h 1m"
+    assert sensor.native_value == 3661
 
 
-def test_sensor_native_value_uptime_invalid_returns_none():
+def test_sensor_native_value_uptime_none_returns_none():
     desc = EcostreamSensorDescription(
-        key="uptime", value_fn=lambda d: "not-an-int"
+        key="uptime", value_fn=lambda d: None
     )
     assert _make_sensor(desc).native_value is None
 

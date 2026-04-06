@@ -51,7 +51,7 @@ Supports *live push updates*, *fan control*, *boost automation*,
 - ETA, EHA, ODA temperature (1 decimal)
 - RPM supply/exhaust
 - Qset (m³/h)
-- Uptime (`Xd Yh Zm`)
+- Uptime (duration in seconds)
 - WiFi RSSI / SSID / IP
 
 ### 🔘 Buttons
@@ -99,7 +99,7 @@ Supports *live push updates*, *fan control*, *boost automation*,
 | Fan Supply Speed         | rpm  | Supply fan speed                        | ✅                  |
 | Summer Comfort Temp      | °C   | Summer comfort temperature threshold    | ✅                  |
 | Filter Replacement Date  | date | Date of last filter reset               | ✅ (diagnostic)     |
-| Uptime                   | -    | Device uptime formatted as `Xd Yh Zm`   | ✅ (diagnostic)     |
+| Uptime                   | s    | Device uptime in seconds (duration)      | ✅ (diagnostic)     |
 | WiFi IP                  | -    | Device IP address                       | ✅                  |
 | WiFi SSID                | -    | Connected WiFi network name             | ✅                  |
 | WiFi RSSI                | dBm  | WiFi signal strength                    | ✅                  |
