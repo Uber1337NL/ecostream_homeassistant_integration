@@ -92,7 +92,7 @@ Supports *live push updates*, *fan control*, *preset overrides*,
 | Fan Supply Speed         | rpm  | Supply fan speed                        | ✅                  |
 | Summer Comfort Temp      | °C   | Summer comfort temperature threshold    | ✅                  |
 | Filter Replacement Date  | date | Date of last filter reset               | ✅ (diagnostic)     |
-| Uptime                   | s    | Device uptime in seconds (duration)      | ✅ (diagnostic)     |
+| Uptime                   | s    | Device uptime in seconds (duration)     | ✅ (diagnostic)     |
 | WiFi IP                  | -    | Device IP address                       | ✅                  |
 | WiFi SSID                | -    | Connected WiFi network name             | ✅                  |
 | WiFi RSSI                | dBm  | WiFi signal strength                    | ✅                  |
@@ -288,6 +288,23 @@ lovelace:
       show_in_sidebar: true
       filename: dashboards/ecostream.yaml
 ```
+
+If you want a human readable uptime (x days, y hours) instead of seconds, paste this code in the configuration.yaml to. This is the default option in the supplied dashboard.
+
+```yaml
+template:
+  - sensor:
+      - name: "Ecostream Uptime"
+        unique_id: ecostream_uptime_human
+        state: >
+          {% set s = states('sensor.ecostream_uptime') | int(0) %}
+          {% set days = (s // 86400) %}
+          {% set hours = (s % 86400) // 3600 %}
+          {% set minutes = (s % 3600) // 60 %}
+          {{ days }}d {{ hours }}u {{ minutes }}m
+        icon: mdi:timer-outline
+```
+
 
 3. Restart Home Assistant (or reload Lovelace/resources where applicable).
 
