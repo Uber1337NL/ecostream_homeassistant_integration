@@ -9,7 +9,7 @@ import pytest
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from homeassistant.components.climate import HVACAction, HVACMode
+from homeassistant.components.climate.const import HVACAction, HVACMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -96,21 +96,30 @@ def test_hvac_mode_off_when_missing():
 
 def test_hvac_action_cooling_when_bypass_open():
     entity, _ = _make_entity(
-        {"config": {"sum_com_enabled": True}, "status": {"bypass_pos": 100}}
+        {
+            "config": {"sum_com_enabled": True},
+            "status": {"bypass_pos": 100},
+        }
     )
     assert entity.hvac_action == HVACAction.COOLING
 
 
 def test_hvac_action_idle_when_bypass_closed():
     entity, _ = _make_entity(
-        {"config": {"sum_com_enabled": True}, "status": {"bypass_pos": 0}}
+        {
+            "config": {"sum_com_enabled": True},
+            "status": {"bypass_pos": 0},
+        }
     )
     assert entity.hvac_action == HVACAction.IDLE
 
 
 def test_hvac_action_off_when_disabled():
     entity, _ = _make_entity(
-        {"config": {"sum_com_enabled": False}, "status": {"bypass_pos": 100}}
+        {
+            "config": {"sum_com_enabled": False},
+            "status": {"bypass_pos": 100},
+        }
     )
     assert entity.hvac_action == HVACAction.OFF
 
@@ -183,8 +192,10 @@ async def test_set_hvac_mode_no_ws():
 
 def test_handle_coordinator_update():
     entity, _ = _make_entity(
-        {"config": {"sum_com_enabled": True, "sum_com_temp": 24},
-         "status": {"bypass_pos": 50, "sensor_temp_eta": 21}}
+        {
+            "config": {"sum_com_enabled": True, "sum_com_temp": 24},
+            "status": {"bypass_pos": 50, "sensor_temp_eta": 21},
+        }
     )
     entity._handle_coordinator_update()
     cast(MagicMock, entity.async_write_ha_state).assert_called_once()
