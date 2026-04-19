@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from homeassistant.components.climate import (
-    ClimateEntity,
+from homeassistant.components.climate import ClimateEntity
+from homeassistant.components.climate.const import (
     ClimateEntityFeature,
     HVACAction,
     HVACMode,
@@ -45,7 +45,6 @@ class EcostreamSummerComfortClimate(  # pyright: ignore[reportIncompatibleVariab
 
     _attr_has_entity_name = True
     _attr_name = "Summer Comfort"
-    _attr_hvac_modes = [HVACMode.OFF, HVACMode.COOL]
     _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_target_temperature_step = PRECISION_WHOLE
@@ -59,7 +58,10 @@ class EcostreamSummerComfortClimate(  # pyright: ignore[reportIncompatibleVariab
     ) -> None:
         super().__init__(coordinator)
         self._entry = entry
-        self._attr_unique_id = f"{entry.entry_id}_summer_comfort_climate"
+        self._attr_hvac_modes = [HVACMode.OFF, HVACMode.COOL]
+        self._attr_unique_id = (
+            f"{entry.entry_id}_summer_comfort_climate"
+        )
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, coordinator.host)},
             manufacturer="BUVA",
@@ -99,7 +101,9 @@ class EcostreamSummerComfortClimate(  # pyright: ignore[reportIncompatibleVariab
         status = self._get_status()
 
         enabled = bool(config.get("sum_com_enabled", False))
-        self._attr_hvac_mode = HVACMode.COOL if enabled else HVACMode.OFF
+        self._attr_hvac_mode = (
+            HVACMode.COOL if enabled else HVACMode.OFF
+        )
 
         if not enabled:
             self._attr_hvac_action = HVACAction.OFF
