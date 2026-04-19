@@ -9,22 +9,20 @@ DOMAIN = "ecostream"
 PLATFORMS: list[str] = [
     "button",
     "binary_sensor",
+    "climate",
     "sensor",
     "fan",
-    "select",
     "switch",
 ]
 
-### THE BOOST AND DEFAULT OPTIONS BELOW ARE THE ONLY ONES YOU SHOULD NEED TO EDIT ###
+### THE DEFAULT OPTIONS BELOW ARE THE ONLY ONES YOU SHOULD NEED TO EDIT ###
 
-# Boost
 CO2_THRESHOLD = 800
-BOOST_OPTIONS = ["5", "10", "15", "30", "60"]
 
 # Default options
 DEFAULT_FILTER_REPLACEMENT_DAYS = 180
 DEFAULT_PRESET_OVERRIDE_MINUTES = 60
-DEFAULT_BOOST_DURATION_MINUTES = 15
+DEFAULT_BYPASS_DURATION_MINUTES = 60
 DEFAULT_SUMMER_COMFORT_TEMP = 22
 
 ### NO NEED TO EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU'RE DOING ###
@@ -32,7 +30,7 @@ DEFAULT_SUMMER_COMFORT_TEMP = 22
 # Config options
 CONF_FILTER_REPLACEMENT_DAYS = "filter_replacement_days"
 CONF_PRESET_OVERRIDE_MINUTES = "preset_override_minutes"
-CONF_BOOST_DURATION = "boost_duration"
+CONF_BYPASS_DURATION = "bypass_duration"
 CONF_ALLOW_OVERRIDE_FILTER_DATE = "allow_override_filter_date"
 CONF_SUMMER_COMFORT_TEMP = "summer_comfort_temp"
 

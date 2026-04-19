@@ -156,7 +156,6 @@ class TestAsyncGetConfigEntryDiagnostics:
         coordinator = MagicMock()
         coordinator.options = {
             "filter_replacement_days": 180,
-            "boost_duration": 15,
         }
         coordinator.data = {}
         coordinator.last_update_success = True
@@ -177,7 +176,6 @@ class TestAsyncGetConfigEntryDiagnostics:
         assert result["coordinator"]["last_update_utc"] is not None
         assert result["coordinator"]["seconds_since_last_update"] == 0
         assert result["coordinator"]["filter_replacement_days"] == 180
-        assert result["coordinator"]["boost_duration_minutes"] == 15
 
     @pytest.mark.asyncio
     async def test_diagnostics_with_raw_status(self):

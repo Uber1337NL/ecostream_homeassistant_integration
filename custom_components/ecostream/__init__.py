@@ -17,10 +17,10 @@ from aiohttp import ClientError, WSMsgType
 
 from .const import (
     CONF_ALLOW_OVERRIDE_FILTER_DATE,
-    CONF_BOOST_DURATION,
+    CONF_BYPASS_DURATION,
     CONF_FILTER_REPLACEMENT_DAYS,
     CONF_PRESET_OVERRIDE_MINUTES,
-    DEFAULT_BOOST_DURATION_MINUTES,
+    DEFAULT_BYPASS_DURATION_MINUTES,
     DEFAULT_FILTER_REPLACEMENT_DAYS,
     DEFAULT_PRESET_OVERRIDE_MINUTES,
     DOMAIN,
@@ -101,7 +101,7 @@ async def async_setup_entry(
         CONF_PRESET_OVERRIDE_MINUTES, DEFAULT_PRESET_OVERRIDE_MINUTES
     )
     options.setdefault(
-        CONF_BOOST_DURATION, DEFAULT_BOOST_DURATION_MINUTES
+        CONF_BYPASS_DURATION, DEFAULT_BYPASS_DURATION_MINUTES
     )
 
     coordinator = EcostreamDataUpdateCoordinator(
@@ -110,8 +110,8 @@ async def async_setup_entry(
         options=options,
     )
 
-    coordinator.boost_duration_minutes = int(
-        options.get(CONF_BOOST_DURATION, DEFAULT_BOOST_DURATION_MINUTES)
+    coordinator.bypass_duration_minutes = int(
+        options.get(CONF_BYPASS_DURATION, DEFAULT_BYPASS_DURATION_MINUTES)
     )
 
     # Start WebSocket listener
@@ -128,12 +128,12 @@ async def async_setup_entry(
     )
 
     _LOGGER.info(
-        "EcoStream entry %s set up for host %s (filter_days=%s preset_override=%sm boost=%sm)",
+        "EcoStream entry %s set up for host %s (filter_days=%s preset_override=%sm bypass=%sm)",
         entry.entry_id,
         host,
         options.get(CONF_FILTER_REPLACEMENT_DAYS),
         options.get(CONF_PRESET_OVERRIDE_MINUTES),
-        options.get(CONF_BOOST_DURATION),
+        options.get(CONF_BYPASS_DURATION),
     )
 
     return True
@@ -145,13 +145,13 @@ async def _async_options_updated(
     """Update device configuration when options change."""
     coordinator: EcostreamDataUpdateCoordinator = entry.runtime_data
 
-    # Update boost duration
-    boost_duration = int(
+    # Update bypass duration
+    bypass_duration = int(
         entry.options.get(
-            CONF_BOOST_DURATION, DEFAULT_BOOST_DURATION_MINUTES
+            CONF_BYPASS_DURATION, DEFAULT_BYPASS_DURATION_MINUTES
         )
     )
-    coordinator.boost_duration_minutes = boost_duration
+    coordinator.bypass_duration_minutes = bypass_duration
 
     # Only update filter date if override is allowed
     allow_override = entry.options.get(
@@ -161,8 +161,7 @@ async def _async_options_updated(
     if allow_override:
         if not coordinator.ws:
             _LOGGER.debug(
-                "EcoStream options updated locally (boost_duration=%sm), skipping filter_datetime update because WS is disconnected",
-                boost_duration,
+                "EcoStream options updated locally, skipping filter_datetime update because WS is disconnected",
             )
             return
 
@@ -178,15 +177,13 @@ async def _async_options_updated(
             {"config": {"filter_datetime": filter_datetime}}
         )
         _LOGGER.debug(
-            "EcoStream filter_datetime updated: %s days → timestamp %s, boost_duration=%sm",
+            "EcoStream filter_datetime updated: %s days → timestamp %s",
             filter_days,
             filter_datetime,
-            boost_duration,
         )
     else:
         _LOGGER.debug(
-            "EcoStream options updated: boost_duration=%sm (filter override disabled)",
-            boost_duration,
+            "EcoStream options updated (filter override disabled)",
         )
 
 

@@ -160,7 +160,6 @@ async def test_async_setup_entry_success():
     entry.options = {
         "filter_replacement_days": 180,
         "preset_override_minutes": 60,
-        "boost_duration": 15,
     }
 
     mock_coordinator = MagicMock()
@@ -216,7 +215,6 @@ async def test_async_setup_entry_uses_default_options():
                 # Check that default options are set
                 assert "filter_replacement_days" in kwargs["options"]
                 assert "preset_override_minutes" in kwargs["options"]
-                assert "boost_duration" in kwargs["options"]
 
 
 # ---------------------------------------------------------------------------
@@ -357,7 +355,6 @@ async def test_options_updated_with_filter_override_enabled():
     hass = MagicMock()
     entry = MagicMock()
     entry.options = {
-        "boost_duration": 30,
         "allow_override_filter_date": True,
         "filter_replacement_days": 90,
     }
@@ -372,7 +369,6 @@ async def test_options_updated_with_filter_override_enabled():
     ):
         await async_options_updated(hass, entry)
 
-    assert coordinator.boost_duration_minutes == 30
     coordinator.ws.send_json.assert_called_once()
     call_args = coordinator.ws.send_json.call_args[0][0]
     assert "config" in call_args
@@ -388,7 +384,6 @@ async def test_options_updated_with_filter_override_disabled():
     hass = MagicMock()
     entry = MagicMock()
     entry.options = {
-        "boost_duration": 15,
         "allow_override_filter_date": False,
     }
 
@@ -399,7 +394,6 @@ async def test_options_updated_with_filter_override_disabled():
 
     await async_options_updated(hass, entry)
 
-    assert coordinator.boost_duration_minutes == 15
     # Should not send JSON when override is disabled
     coordinator.ws.send_json.assert_not_called()
 
@@ -411,7 +405,6 @@ async def test_options_updated_with_ws_disconnected():
     hass = MagicMock()
     entry = MagicMock()
     entry.options = {
-        "boost_duration": 20,
         "allow_override_filter_date": True,
         "filter_replacement_days": 180,
     }
@@ -422,7 +415,6 @@ async def test_options_updated_with_ws_disconnected():
 
     await async_options_updated(hass, entry)
 
-    assert coordinator.boost_duration_minutes == 20
     # No exception should be raised
 
 
@@ -439,9 +431,6 @@ async def test_options_updated_uses_defaults():
     entry.runtime_data = coordinator
 
     await async_options_updated(hass, entry)
-
-    # Should use default boost duration (15 minutes)
-    assert coordinator.boost_duration_minutes == 15
 
 
 # ---------------------------------------------------------------------------

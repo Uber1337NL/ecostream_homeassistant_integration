@@ -8,7 +8,7 @@ Quality scale: **Platinum**
 
 A **full-featured, modern and high-performance** Home Assistant integration
 for the **BUVA EcoStream** balanced ventilation unit.
-Supports *live push updates*, *fan control*, *boost automation*,
+Supports *live push updates*, *fan control*, *preset overrides*,
 *bypass switch control*, *diagnostics*, *WiFi info*, and an
 **Apple Home-style dashboard**.
 
@@ -31,13 +31,6 @@ Supports *live push updates*, *fan control*, *boost automation*,
 - Preset-based control (low / mid / high)
 - Fast-mode window after manual control actions
 
-### 🚀 Advanced Boost Mode
-
-- Configurable duration (5/10/15/30/60 min)
-- Uses `setpoint_high` as boost setpoint source
-- Remaining override time via sensor (`mode_time_left`)
-- Visual dashboard tile (optional Apple-style card)
-
 ### 🔁 Bypass Control
 
 - Bypass is exposed as a binary switch (`open` / `closed`)
@@ -51,7 +44,7 @@ Supports *live push updates*, *fan control*, *boost automation*,
 - ETA, EHA, ODA temperature (1 decimal)
 - RPM supply/exhaust
 - Qset (m³/h)
-- Uptime (`Xd Yh Zm`)
+- Uptime (duration in seconds)
 - WiFi RSSI / SSID / IP
 
 ### 🔘 Buttons
@@ -99,7 +92,7 @@ Supports *live push updates*, *fan control*, *boost automation*,
 | Fan Supply Speed         | rpm  | Supply fan speed                        | ✅                  |
 | Summer Comfort Temp      | °C   | Summer comfort temperature threshold    | ✅                  |
 | Filter Replacement Date  | date | Date of last filter reset               | ✅ (diagnostic)     |
-| Uptime                   | -    | Device uptime formatted as `Xd Yh Zm`   | ✅ (diagnostic)     |
+| Uptime                   | s    | Device uptime in seconds (duration)      | ✅ (diagnostic)     |
 | WiFi IP                  | -    | Device IP address                       | ✅                  |
 | WiFi SSID                | -    | Connected WiFi network name             | ✅                  |
 | WiFi RSSI                | dBm  | WiFi signal strength                    | ✅                  |
@@ -119,8 +112,6 @@ Supports *live push updates*, *fan control*, *boost automation*,
 | Bypass Valve   | Switch   | Open or close bypass override                     |
 | Schedule       | Switch   | Enable or disable the ventilation schedule        |
 | Summer Comfort | Switch   | Enable or disable summer comfort mode             |
-| Boost          | Switch   | Start or stop boost mode                          |
-| Boost Duration | Select   | Configure boost duration (5 / 10 / 15 / 30 / 60)  |
 | Reset Filter   | Button   | Reset filter replacement date (if option enabled) |
 
 ### Binary Sensors
@@ -181,9 +172,9 @@ Use the Schedule switch to let the device follow its built-in
 time schedule overnight, then override to a fixed low level
 during quiet hours via automation.
 
-### Boost after cooking or shower
+### Preset override after cooking or shower
 
-Trigger a timed boost when a motion sensor or humidity spike is
+Trigger a timed preset high override when a motion sensor or humidity spike is
 detected in kitchen or bathroom, and let it auto-cancel when
 CO₂ drops back to baseline.
 
@@ -336,7 +327,6 @@ You can configure:
 
 - Filter replacement interval (days)
 - Preset override duration (minutes)
-- Boost duration (minutes)
 - Summer comfort target temperature (15-30 C)
 - Allow override filter date
 
@@ -365,12 +355,7 @@ You can configure:
 ### Fan Control Has No Effect
 
 - Ensure the Schedule switch is **off** - an active schedule may override manual control.
-- Check if Boost mode is active; boost takes priority over manual fan control.
-
-### Boost Does Not Stop Automatically
-
-- Boost runs for the configured boost duration.
-- You can stop it manually with `switch.ecostream_boost`.
+- Check if a preset override is active; overrides take priority over manual fan control.
 
 ### Enable Debug Logging
 
@@ -395,22 +380,22 @@ current data, and sanitized WiFi details.
 
 ## 💡 Automation Examples
 
-### Boost on high CO₂
+### High preset on high CO₂
 
 ```yaml
-alias: EcoStream - Boost on high CO₂
+alias: EcoStream - High preset on high CO₂
 trigger:
   - platform: numeric_state
     entity_id: sensor.ecostream_eco2_return
     above: 1000
 condition:
   - condition: state
-    entity_id: switch.ecostream_boost
+    entity_id: switch.ecostream_preset_high
     state: "off"
 action:
   - service: switch.turn_on
     target:
-      entity_id: switch.ecostream_boost
+      entity_id: switch.ecostream_preset_high
 ```
 
 ### Notify on Filter Overdue
