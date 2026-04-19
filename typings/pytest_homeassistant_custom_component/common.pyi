@@ -2,7 +2,7 @@
 
 import asyncio
 from collections.abc import (
-    AsyncGenerator,
+    AsyncIterator,
     Callable,
     Coroutine,
     Generator,
@@ -99,9 +99,21 @@ async def async_get_device_automations(
     """Get a device automation for a single device id."""
     ...
 
+async def async_get_device_automation_capabilities(
+    hass: HomeAssistant,
+    automation_type: device_automation.DeviceAutomationType,
+    automation: dict[str, Any],
+) -> dict[str, Any]:
+    """Get capabilities for a specific device automation."""
+    ...
+
+def get_test_instance_port() -> int:
+    """Return a test instance port."""
+    ...
+
 def threadsafe_callback_factory(
-    func,
-):  # -> _Wrapped[Callable[..., Any], Any, Callable[..., Any], Any]:
+    func: Callable[..., Any],
+) -> Callable[..., Any]:
     """Create threadsafe functions out of callbacks.
 
     Callback needs to have `hass` as first argument.
@@ -109,20 +121,20 @@ def threadsafe_callback_factory(
     ...
 
 def threadsafe_coroutine_factory(
-    func,
-):  # -> _Wrapped[Callable[..., Any], Any, Callable[..., Any], Any]:
+    func: Callable[..., Any],
+) -> Callable[..., Any]:
     """Create threadsafe functions out of coroutine.
 
     Callback needs to have `hass` as first argument.
     """
     ...
 
-def get_test_config_dir(*add_path):  # -> str:
+def get_test_config_dir(*add_path: str) -> str:
     """Return a path to a test config dir."""
     ...
 
-class StoreWithoutWriteLoad[_T: (Mapping[str, Any] | Sequence[Any])](
-    storage.Store[_T]
+class StoreWithoutWriteLoad[T: (Mapping[str, Any] | Sequence[Any])](
+    storage.Store[T]
 ):
     """Fake store that does not write or load. Used for testing."""
     async def async_save(self, *args: Any, **kwargs: Any) -> None:
@@ -141,12 +153,12 @@ class StoreWithoutWriteLoad[_T: (Mapping[str, Any] | Sequence[Any])](
         ...
 
 @asynccontextmanager
-async def async_test_home_assistant(
+def async_test_home_assistant(
     event_loop: asyncio.AbstractEventLoop | None = ...,
     load_registries: bool = ...,
     config_dir: str | None = ...,
     initial_state: CoreState = ...,
-) -> AsyncGenerator[HomeAssistant]:
+) -> AsyncIterator[HomeAssistant]:
     """Return a Home Assistant object pointing at test config dir."""
     ...
 
@@ -326,25 +338,7 @@ def mock_registry(
 class RegistryEntryWithDefaults(er.RegistryEntry):
     """Helper to create a registry entry with defaults."""
 
-    capabilities: Mapping[str, Any] | None = ...
-    config_entry_id: str | None = ...
-    config_subentry_id: str | None = ...
-    created_at: datetime = ...
-    device_id: str | None = ...
-    disabled_by: er.RegistryEntryDisabler | None = ...
-    entity_category: er.EntityCategory | None = ...
-    hidden_by: er.RegistryEntryHider | None = ...
-    id: str = ...
-    has_entity_name: bool = ...
-    object_id_base: str | None = ...
-    options: er.ReadOnlyEntityOptionsType = ...
-    original_device_class: str | None = ...
-    original_icon: str | None = ...
-    original_name: str | None = ...
-    suggested_object_id: str | None = ...
-    supported_features: int = ...
-    translation_key: str | None = ...
-    unit_of_measurement: str | None = ...
+    ...
 
 def mock_area_registry(
     hass: HomeAssistant,
@@ -479,7 +473,7 @@ class MockModule:
         """Initialize the mock module."""
         ...
 
-    def mock_manifest(self):  # -> dict[str, str | object | Any]:
+    def mock_manifest(self) -> dict[str, Any]:
         """Generate a mock manifest to represent this module."""
         ...
 
@@ -528,12 +522,12 @@ class MockEntityPlatform(entity_platform.EntityPlatform):
     def __init__(
         self,
         hass: HomeAssistant,
-        logger=...,
-        domain=...,
-        platform_name=...,
-        platform=...,
-        scan_interval=...,
-        entity_namespace=...,
+        logger: Any = ...,
+        domain: str = ...,
+        platform_name: str = ...,
+        platform: Any = ...,
+        scan_interval: timedelta | None = ...,
+        entity_namespace: str | None = ...,
     ) -> None:
         """Initialize a mock entity platform."""
         ...
@@ -544,21 +538,6 @@ class MockToggleEntity(entity.ToggleEntity):
         self, name: str | None, state: Literal["on", "off"] | None
     ) -> None:
         """Initialize the mock entity."""
-        ...
-
-    @property
-    def name(self) -> str:
-        """Return the name of the entity if any."""
-        ...
-
-    @property
-    def state(self) -> Literal["on", "off"] | None:
-        """Return the state of the entity if any."""
-        ...
-
-    @property
-    def is_on(self) -> bool:
-        """Return true if entity is on."""
         ...
 
     def turn_on(self, **kwargs: Any) -> None:
@@ -580,22 +559,22 @@ class MockConfigEntry(config_entries.ConfigEntry):
     def __init__(
         self,
         *,
-        data=...,
-        disabled_by=...,
-        discovery_keys=...,
-        domain=...,
-        entry_id=...,
-        minor_version=...,
-        options=...,
-        pref_disable_new_entities=...,
-        pref_disable_polling=...,
-        reason=...,
-        source=...,
-        state=...,
-        subentries_data=...,
-        title=...,
-        unique_id=...,
-        version=...,
+        data: Mapping[str, Any] = ...,
+        disabled_by: config_entries.ConfigEntryDisabler | None = ...,
+        discovery_keys: Mapping[str, Any] | None = ...,
+        domain: str = ...,
+        entry_id: str = ...,
+        minor_version: int = ...,
+        options: Mapping[str, Any] = ...,
+        pref_disable_new_entities: bool | None = ...,
+        pref_disable_polling: bool | None = ...,
+        reason: str | None = ...,
+        source: str = ...,
+        state: config_entries.ConfigEntryState = ...,
+        subentries_data: Mapping[str, Any] | None = ...,
+        title: str = ...,
+        unique_id: str | None = ...,
+        version: int = ...,
     ) -> None:
         """Initialize a mock config entry."""
         ...
@@ -669,15 +648,15 @@ async def start_reauth_flow(
     ...
 
 def patch_yaml_files(
-    files_dict, endswith=...
-):  # -> _patch[Callable[..., StringIO | TextIOWrapper[_WrappedBuffer]]]:
+    files_dict: Mapping[str, str], endswith: str = ...
+) -> Any:
     """Patch load_yaml with a dictionary of yaml files."""
     ...
 
 @contextmanager
 def assert_setup_component(
-    count, domain=...
-):  # -> Generator[dict[Any, Any], Any, None]:
+    count: int, domain: str | None = ...
+) -> Generator[dict[Any, Any]]:
     """Collect valid configuration from setup_component.
 
     - count: The amount of valid platforms that should be setup
@@ -721,88 +700,9 @@ async def async_mock_load_restore_state_from_storage(
 
 class MockEntity(entity.Entity):
     """Mock Entity class."""
+
     def __init__(self, **values: Any) -> None:
         """Initialize an entity."""
-        ...
-
-    @property
-    def available(self) -> bool:
-        """Return True if entity is available."""
-        ...
-
-    @property
-    def capability_attributes(self) -> Mapping[str, Any] | None:
-        """Info about capabilities."""
-        ...
-
-    @property
-    def device_class(self) -> str | None:
-        """Info how device should be classified."""
-        ...
-
-    @property
-    def device_info(self) -> dr.DeviceInfo | None:
-        """Info how it links to a device."""
-        ...
-
-    @property
-    def entity_category(self) -> entity.EntityCategory | None:
-        """Return the entity category."""
-        ...
-
-    @property
-    def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        """Return entity specific state attributes."""
-        ...
-
-    @property
-    def has_entity_name(self) -> bool:
-        """Return the has_entity_name name flag."""
-        ...
-
-    @property
-    def entity_registry_enabled_default(self) -> bool:
-        """Return if the entity should be enabled when first added to the entity registry."""
-        ...
-
-    @property
-    def entity_registry_visible_default(self) -> bool:
-        """Return if the entity should be visible when first added to the entity registry."""
-        ...
-
-    @property
-    def icon(self) -> str | None:
-        """Return the suggested icon."""
-        ...
-
-    @property
-    def name(self) -> str | None:
-        """Return the name of the entity."""
-        ...
-
-    @property
-    def should_poll(self) -> bool:
-        """Return the ste of the polling."""
-        ...
-
-    @property
-    def supported_features(self) -> int | None:
-        """Info about supported features."""
-        ...
-
-    @property
-    def translation_key(self) -> str | None:
-        """Return the translation key."""
-        ...
-
-    @property
-    def unique_id(self) -> str | None:
-        """Return the unique ID of the entity."""
-        ...
-
-    @property
-    def unit_of_measurement(self) -> str | None:
-        """Info on the units the entity state is in."""
         ...
 
 @contextmanager
@@ -817,7 +717,7 @@ def mock_storage(
     """
     ...
 
-async def flush_store(store: storage.Store) -> None:
+async def flush_store(store: storage.Store[Any]) -> None:
     """Make sure all delayed writes of a store are written."""
     ...
 
@@ -847,7 +747,7 @@ def mock_platform(
     hass: HomeAssistant,
     platform_path: str,
     module: Mock | MockPlatform | None = ...,
-    built_in=...,
+    built_in: bool = ...,
 ) -> None:
     """Mock a platform.
 
@@ -855,16 +755,16 @@ def mock_platform(
     """
     ...
 
-def async_capture_events[_DataT: Mapping[str, Any] = dict[str, Any]](
-    hass: HomeAssistant, event_name: EventType[_DataT] | str
-) -> list[Event[_DataT]]:
+def async_capture_events[DataT: Mapping[str, Any] = dict[str, Any]](
+    hass: HomeAssistant, event_name: EventType[DataT] | str
+) -> list[Event[DataT]]:
     """Create a helper that captures events."""
     ...
 
 @callback
-def async_mock_signal[*_Ts](
-    hass: HomeAssistant, signal: SignalType[*_Ts] | str
-) -> list[tuple[*_Ts]]:
+def async_mock_signal[*Ts](
+    hass: HomeAssistant, signal: SignalType[*Ts] | str
+) -> list[tuple[*Ts]]:
     """Catch all dispatches to a signal."""
     ...
 
@@ -910,7 +810,7 @@ def async_mock_cloud_connection_status(
     ...
 
 @asynccontextmanager
-async def async_call_logger_set_level(
+def async_call_logger_set_level(
     logger: str,
     level: Literal[
         "DEBUG", "INFO", "WARNING", "ERROR", "FATAL", "CRITICAL"
@@ -918,7 +818,7 @@ async def async_call_logger_set_level(
     *,
     hass: HomeAssistant,
     caplog: pytest.LogCaptureFixture,
-) -> AsyncGenerator[None]:
+) -> AsyncIterator[None]:
     """Context manager to reset loggers after logger.set_level call."""
     ...
 
