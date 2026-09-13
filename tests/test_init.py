@@ -281,34 +281,29 @@ async def test_cleanup_stale_devices_removes_old_host():
     # Create mock device with old host identifier
     old_device = MagicMock()
     old_device.id = "old_device_id"
-    old_device.config_entries = {"test_entry"}
     old_device.identifiers = {(DOMAIN, "192.168.1.1")}
 
     # Create mock device with current host identifier
     current_device = MagicMock()
     current_device.id = "current_device_id"
-    current_device.config_entries = {"test_entry"}
     current_device.identifiers = {(DOMAIN, "192.168.1.100")}
 
-    # Create mock device from different config entry
-    other_device = MagicMock()
-    other_device.id = "other_device_id"
-    other_device.config_entries = {"other_entry"}
-    other_device.identifiers = {(DOMAIN, "192.168.1.1")}
-
     mock_dev_reg = MagicMock(spec=DeviceRegistry)
-    mock_dev_reg.devices = {
-        "old": old_device,
-        "current": current_device,
-        "other": other_device,
-    }
     mock_dev_reg.async_remove_device = MagicMock()
 
-    with patch(
-        "custom_components.ecostream.async_get_device_registry",
-        return_value=mock_dev_reg,
+    with (
+        patch(
+            "custom_components.ecostream.async_get_device_registry",
+            return_value=mock_dev_reg,
+        ),
+        patch(
+            "custom_components.ecostream.async_entries_for_config_entry",
+            return_value=[old_device, current_device],
+        ) as mock_entries,
     ):
         await cleanup_stale_devices(hass, entry, current_host)
+
+    mock_entries.assert_called_once_with(mock_dev_reg, "test_entry")
 
     # Old device should be removed
     mock_dev_reg.async_remove_device.assert_called_once_with(
@@ -328,16 +323,20 @@ async def test_cleanup_stale_devices_keeps_current_host():
 
     current_device = MagicMock()
     current_device.id = "current_device_id"
-    current_device.config_entries = {"test_entry"}
     current_device.identifiers = {(DOMAIN, "192.168.1.100")}
 
     mock_dev_reg = MagicMock(spec=DeviceRegistry)
-    mock_dev_reg.devices = {"current": current_device}
     mock_dev_reg.async_remove_device = MagicMock()
 
-    with patch(
-        "custom_components.ecostream.async_get_device_registry",
-        return_value=mock_dev_reg,
+    with (
+        patch(
+            "custom_components.ecostream.async_get_device_registry",
+            return_value=mock_dev_reg,
+        ),
+        patch(
+            "custom_components.ecostream.async_entries_for_config_entry",
+            return_value=[current_device],
+        ),
     ):
         await cleanup_stale_devices(hass, entry, current_host)
 
