@@ -7,6 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.device_registry import (
+    async_entries_for_config_entry,
     async_get as async_get_device_registry,
 )
 import logging
@@ -65,21 +66,19 @@ async def _cleanup_stale_devices(
 ) -> None:
     """Remove devices whose identifier host no longer matches the current host."""
     dev_reg = async_get_device_registry(hass)
-    for device in list(dev_reg.devices.values()):
-        for config_entry_id in device.config_entries:
-            if config_entry_id != entry.entry_id:
-                continue
-            stale = any(
-                identifier[0] == DOMAIN
-                and identifier[1] != current_host
-                for identifier in device.identifiers
+    for device in async_entries_for_config_entry(
+        dev_reg, entry.entry_id
+    ):
+        stale = any(
+            identifier[0] == DOMAIN and identifier[1] != current_host
+            for identifier in device.identifiers
+        )
+        if stale:
+            _LOGGER.debug(
+                "Removing stale EcoStream device %s (old host identifier)",
+                device.id,
             )
-            if stale:
-                _LOGGER.debug(
-                    "Removing stale EcoStream device %s (old host identifier)",
-                    device.id,
-                )
-                dev_reg.async_remove_device(device.id)
+            dev_reg.async_remove_device(device.id)
 
 
 async def async_setup_entry(
