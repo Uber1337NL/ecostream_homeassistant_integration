@@ -8,10 +8,8 @@ import pytest
 
 from custom_components.ecostream.const import (
     CONF_ALLOW_OVERRIDE_FILTER_DATE,
-    CONF_BOOST_DURATION,
     CONF_FILTER_REPLACEMENT_DAYS,
     CONF_PRESET_OVERRIDE_MINUTES,
-    DEFAULT_BOOST_DURATION_MINUTES,
     DEFAULT_FILTER_REPLACEMENT_DAYS,
     DEFAULT_PRESET_OVERRIDE_MINUTES,
 )
@@ -47,7 +45,6 @@ async def test_async_step_init_shows_form_with_existing_defaults():
         options={
             CONF_FILTER_REPLACEMENT_DAYS: 90,
             CONF_PRESET_OVERRIDE_MINUTES: 30,
-            CONF_BOOST_DURATION: 20,
             CONF_ALLOW_OVERRIDE_FILTER_DATE: True,
         },
     )
@@ -69,7 +66,6 @@ async def test_async_step_init_shows_form_with_existing_defaults():
     defaults = cast(dict[str, Any], data_schema({}))
     assert defaults[CONF_FILTER_REPLACEMENT_DAYS] == 90
     assert defaults[CONF_PRESET_OVERRIDE_MINUTES] == 30
-    assert defaults[CONF_BOOST_DURATION] == 20
     assert defaults[CONF_ALLOW_OVERRIDE_FILTER_DATE] is True
 
 
@@ -98,9 +94,6 @@ async def test_async_step_init_shows_form_with_hardcoded_defaults_when_missing()
         defaults[CONF_PRESET_OVERRIDE_MINUTES]
         == DEFAULT_PRESET_OVERRIDE_MINUTES
     )
-    assert (
-        defaults[CONF_BOOST_DURATION] == DEFAULT_BOOST_DURATION_MINUTES
-    )
     assert defaults[CONF_ALLOW_OVERRIDE_FILTER_DATE] is False
 
 
@@ -118,7 +111,6 @@ async def test_async_step_init_valid_input_creates_entry_and_updates_options():
         {
             CONF_FILTER_REPLACEMENT_DAYS: 120,
             CONF_PRESET_OVERRIDE_MINUTES: 45,
-            CONF_BOOST_DURATION: 10,
             CONF_ALLOW_OVERRIDE_FILTER_DATE: False,
         }
     )
@@ -128,7 +120,6 @@ async def test_async_step_init_valid_input_creates_entry_and_updates_options():
     assert result.get("data", {})["preserve_me"] is True
     assert result.get("data", {})[CONF_FILTER_REPLACEMENT_DAYS] == 120
     assert result.get("data", {})[CONF_PRESET_OVERRIDE_MINUTES] == 45
-    assert result.get("data", {})[CONF_BOOST_DURATION] == 10
     assert (
         result.get("data", {})[CONF_ALLOW_OVERRIDE_FILTER_DATE] is False
     )
@@ -140,7 +131,6 @@ async def test_async_step_init_filter_days_too_short_returns_error():
         options={
             CONF_FILTER_REPLACEMENT_DAYS: 180,
             CONF_PRESET_OVERRIDE_MINUTES: 60,
-            CONF_BOOST_DURATION: 15,
         }
     )
     flow = EcostreamOptionsFlow(entry)
@@ -151,7 +141,6 @@ async def test_async_step_init_filter_days_too_short_returns_error():
         {
             CONF_FILTER_REPLACEMENT_DAYS: 20,  # Too short (< 30)
             CONF_PRESET_OVERRIDE_MINUTES: 60,
-            CONF_BOOST_DURATION: 15,
         }
     )
 
@@ -166,7 +155,6 @@ async def test_async_step_init_preset_override_too_short_returns_error():
         options={
             CONF_FILTER_REPLACEMENT_DAYS: 180,
             CONF_PRESET_OVERRIDE_MINUTES: 60,
-            CONF_BOOST_DURATION: 15,
         }
     )
     flow = EcostreamOptionsFlow(entry)
@@ -177,7 +165,6 @@ async def test_async_step_init_preset_override_too_short_returns_error():
         {
             CONF_FILTER_REPLACEMENT_DAYS: 180,
             CONF_PRESET_OVERRIDE_MINUTES: 3,  # Too short (< 5)
-            CONF_BOOST_DURATION: 15,
         }
     )
 
@@ -185,31 +172,6 @@ async def test_async_step_init_preset_override_too_short_returns_error():
     assert result.get("errors") == {"base": "invalid_number"}
     assert flow._options[CONF_PRESET_OVERRIDE_MINUTES] == 60
 
-
-@pytest.mark.asyncio
-async def test_async_step_init_boost_duration_too_short_returns_error():
-    entry = _make_entry(
-        options={
-            CONF_FILTER_REPLACEMENT_DAYS: 180,
-            CONF_PRESET_OVERRIDE_MINUTES: 60,
-            CONF_BOOST_DURATION: 15,
-        }
-    )
-    flow = EcostreamOptionsFlow(entry)
-
-    flow.async_show_form = MagicMock(side_effect=_mock_show_form)
-
-    result = await flow.async_step_init(
-        {
-            CONF_FILTER_REPLACEMENT_DAYS: 180,
-            CONF_PRESET_OVERRIDE_MINUTES: 60,
-            CONF_BOOST_DURATION: 3,  # Too short (< 5)
-        }
-    )
-
-    assert result.get("type") == "form"
-    assert result.get("errors") == {"base": "invalid_number"}
-    assert flow._options[CONF_BOOST_DURATION] == 15
 
 
 @pytest.mark.asyncio
@@ -223,7 +185,6 @@ async def test_async_step_init_invalid_number_returns_error():
         {
             CONF_FILTER_REPLACEMENT_DAYS: "not-a-number",
             CONF_PRESET_OVERRIDE_MINUTES: 60,
-            CONF_BOOST_DURATION: 15,
         }
     )
 

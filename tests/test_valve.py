@@ -25,6 +25,7 @@ def _make_bypass_switch(
     if ws:
         coordinator.ws.send_json = AsyncMock()
     coordinator.mark_control_action = MagicMock()
+    coordinator.bypass_duration_minutes = 60
 
     entry = MagicMock(spec=ConfigEntry)
     entry.entry_id = "test_entry"
@@ -75,7 +76,7 @@ async def test_turn_on_sends_open_payload():
     bypass, coordinator = _make_bypass_switch()
     await bypass.async_turn_on()
     coordinator.ws.send_json.assert_called_once_with(
-        {"config": {"man_override_bypass": 100}}
+        {"config": {"man_override_bypass": 100, "man_override_bypass_time": 3600}}
     )
 
 

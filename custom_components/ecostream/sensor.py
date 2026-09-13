@@ -10,7 +10,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory
+from homeassistant.const import EntityCategory, UnitOfTime
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -45,24 +45,6 @@ def _deep_get(
         cur = cast(dict[str, Any], cur)[key]
     return cur
 
-
-def _format_uptime(seconds: int) -> str:
-    if seconds < 0:
-        return "0m"
-
-    days = seconds // 86400
-    rem = seconds % 86400
-    hours = rem // 3600
-    rem %= 3600
-    minutes = rem // 60
-
-    parts: list[str] = []
-    if days:
-        parts.append(f"{days}d")
-    if hours or days:
-        parts.append(f"{hours}h")
-    parts.append(f"{minutes}m")
-    return " ".join(parts)
 
 
 def _number_value(
@@ -248,8 +230,11 @@ SENSOR_DESCRIPTIONS: tuple[EcostreamSensorDescription, ...] = (
         name="Uptime",
         translation_key="uptime",
         icon="mdi:timer-outline",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        state_class=SensorStateClass.TOTAL_INCREASING,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda d: _deep_get(d, ["system", "uptime"]),
+        value_fn=_int_value(["system", "uptime"]),
     ),
     # -------------------------------------------------------------------
     # WIFI
@@ -426,12 +411,6 @@ class EcostreamBaseSensor(
             except Exception:
                 return None
 
-        # Uptime formatting
-        if desc.key == "uptime":
-            try:
-                return _format_uptime(int(raw))
-            except Exception:
-                return None
 
         return raw
 

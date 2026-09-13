@@ -14,11 +14,11 @@ import voluptuous as vol
 
 from .const import (
     CONF_ALLOW_OVERRIDE_FILTER_DATE,
-    CONF_BOOST_DURATION,
+    CONF_BYPASS_DURATION,
     CONF_FILTER_REPLACEMENT_DAYS,
     CONF_PRESET_OVERRIDE_MINUTES,
     CONF_SUMMER_COMFORT_TEMP,
-    DEFAULT_BOOST_DURATION_MINUTES,
+    DEFAULT_BYPASS_DURATION_MINUTES,
     DEFAULT_FILTER_REPLACEMENT_DAYS,
     DEFAULT_PRESET_OVERRIDE_MINUTES,
     DEFAULT_SUMMER_COMFORT_TEMP,
@@ -46,9 +46,10 @@ class EcostreamOptionsFlow(OptionsFlowWithConfigEntry):
 
         if user_input is not None:
             try:
-                boost_duration = int(
+                bypass_duration = int(
                     user_input.get(
-                        "boost_duration", DEFAULT_BOOST_DURATION_MINUTES
+                        CONF_BYPASS_DURATION,
+                        DEFAULT_BYPASS_DURATION_MINUTES,
                     )
                 )
                 filter_days = int(
@@ -69,7 +70,7 @@ class EcostreamOptionsFlow(OptionsFlowWithConfigEntry):
                     )
                 )
 
-                if boost_duration < 5:
+                if bypass_duration < 5:
                     errors["base"] = "invalid_number"
                 elif filter_days < 30:
                     errors["base"] = "invalid_number"
@@ -84,7 +85,7 @@ class EcostreamOptionsFlow(OptionsFlowWithConfigEntry):
                     self._options[CONF_PRESET_OVERRIDE_MINUTES] = (
                         preset_override_minutes
                     )
-                    self._options[CONF_BOOST_DURATION] = boost_duration
+                    self._options[CONF_BYPASS_DURATION] = bypass_duration
                     self._options[CONF_ALLOW_OVERRIDE_FILTER_DATE] = (
                         allow_override_filter_date
                     )
@@ -108,9 +109,9 @@ class EcostreamOptionsFlow(OptionsFlowWithConfigEntry):
             CONF_PRESET_OVERRIDE_MINUTES,
             DEFAULT_PRESET_OVERRIDE_MINUTES,
         )
-        current_boost_duration = self._options.get(
-            CONF_BOOST_DURATION,
-            DEFAULT_BOOST_DURATION_MINUTES,
+        current_bypass_duration = self._options.get(
+            CONF_BYPASS_DURATION,
+            DEFAULT_BYPASS_DURATION_MINUTES,
         )
         current_allow_override = self._options.get(
             CONF_ALLOW_OVERRIDE_FILTER_DATE,
@@ -132,8 +133,8 @@ class EcostreamOptionsFlow(OptionsFlowWithConfigEntry):
                     default=current_override_minutes,
                 ): vol.All(int, vol.Range(min=5)),
                 vol.Required(
-                    CONF_BOOST_DURATION,
-                    default=current_boost_duration,
+                    CONF_BYPASS_DURATION,
+                    default=current_bypass_duration,
                 ): vol.All(int, vol.Range(min=5)),
                 vol.Required(
                     CONF_ALLOW_OVERRIDE_FILTER_DATE,

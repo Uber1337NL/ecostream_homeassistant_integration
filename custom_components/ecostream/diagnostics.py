@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any, cast
 
 from .const import (
-    CONF_BOOST_DURATION,
     CONF_FILTER_REPLACEMENT_DAYS,
     CONF_PRESET_OVERRIDE_MINUTES,
 )
@@ -96,7 +95,6 @@ async def async_get_config_entry_diagnostics(
             "preset_override_minutes": opts.get(
                 CONF_PRESET_OVERRIDE_MINUTES
             ),
-            "boost_duration_minutes": opts.get(CONF_BOOST_DURATION),
             "data_keys": list(data.keys()),
         },
         # -------------------------

@@ -60,12 +60,10 @@ def test_coordinator_initialization():
     assert coordinator.ws is None
     assert coordinator._started is False
     assert coordinator._stopping is False
-    assert coordinator.boost_duration_minutes == 0
-    assert coordinator.boost_remaining_seconds == 0
 
 
 def test_coordinator_initialization_with_options():
-    options = {"filter_replacement_days": 90, "boost_duration": 30}
+    options = {"filter_replacement_days": 90}
     coordinator, _ = _make_coordinator(options=options)
 
     assert coordinator.options == options
@@ -365,7 +363,7 @@ async def test_async_send_config_non_preset_override_disables_restore_flag():
     coordinator.ws.send_json = AsyncMock()
 
     await coordinator.async_send_config(
-        {"man_override_set_time": 600}, "boost"
+        {"man_override_set_time": 600}, "other"
     )
 
     assert coordinator._restore_schedule_after_override is False

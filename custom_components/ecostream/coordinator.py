@@ -77,8 +77,7 @@ class EcostreamDataUpdateCoordinator(
         self._started: bool = False
         self._stopping: bool = False
 
-        self.boost_duration_minutes: int = 0
-        self.boost_remaining_seconds: int = 0
+        self.bypass_duration_minutes: int = 0
         self._last_override_active: bool = False
         self._restore_schedule_after_override: bool = False
 
